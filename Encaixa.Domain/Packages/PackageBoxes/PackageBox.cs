@@ -11,29 +11,42 @@ public class PackageBox : Entity<Guid>
     public const string DimensionInvalid =
         $"A caixa possui a dimensão {ErrorResponse.ReferenceToVariable} inválida!";
 
+    public const string UserCannotBeNull = "Usuário não pode ser nulo";
+
     public string BoxLabel { get; }
 
     public Dimension Height { get; }
     public Dimension Width { get; }
     public Dimension Length { get; }
 
+    public int Volume => Height.Value * Width.Value * Length.Value;
+
     public Guid UserId { get; }
-    public virtual User User { get; private set; }
+    public virtual User User { get; }
     
     // Pro EF poder criar os objetos.
     #pragma warning disable CS8618
     protected PackageBox() : base() { }
-    #pragma warning restore CS8618 
 
     private PackageBox(string boxLabel, Dimension height, Dimension width,
-        Dimension length, Guid userId,
-        EntityStatus entityStatus, Guid Id = default) : base(entityStatus, Id)
+                        Dimension length, Guid userId, EntityStatus entityStatus,
+                        Guid Id = default) : base(entityStatus, Id)
     {
         BoxLabel = boxLabel;
         Height = height;
         Width = width;
         Length = length;
         UserId = userId;
+    }
+#pragma warning restore CS8618
+
+    public static Result<PackageBox> Create(string boxLabel,
+        int height, int width, int length, User user, Guid id = default)
+    {
+        if (user is null)
+            return ErrorResponse.InvalidTypeError(UserCannotBeNull);
+
+        return Create(boxLabel, height, width, length, user.Id, id);
     }
 
     public static Result<PackageBox> Create(string boxLabel,
@@ -60,6 +73,6 @@ public class PackageBox : Entity<Guid>
             return errors;
 
         return new PackageBox(boxLabel, heightResult.GetValue(), widthResult.GetValue(),
-            lengthResult.GetValue(), userId, EntityStatus.Activated, id);
+                              lengthResult.GetValue(), userId, EntityStatus.Activated, id);
     }
 }

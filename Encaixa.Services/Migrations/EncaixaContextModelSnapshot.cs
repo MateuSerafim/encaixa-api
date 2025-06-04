@@ -22,6 +22,39 @@ namespace Encaixa.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Encaixa.Domain.Packages.PackageBox", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BoxLabel")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("EntityStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Length")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Width")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PackageBoxes", "Package");
+                });
+
             modelBuilder.Entity("Encaixa.Domain.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -47,7 +80,7 @@ namespace Encaixa.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("[User].UsersData", (string)null);
+                    b.ToTable("UsersData", "User");
                 });
 
             modelBuilder.Entity("Encaixa.Infrastructure.UserIdentity.UserApplication", b =>
@@ -254,6 +287,17 @@ namespace Encaixa.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Encaixa.Domain.Packages.PackageBox", b =>
+                {
+                    b.HasOne("Encaixa.Domain.Users.User", "User")
+                        .WithMany("PackageBoxes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Encaixa.Infrastructure.UserIdentity.UserApplication", b =>
                 {
                     b.HasOne("Encaixa.Domain.Users.User", "User")
@@ -314,6 +358,11 @@ namespace Encaixa.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Encaixa.Domain.Users.User", b =>
+                {
+                    b.Navigation("PackageBoxes");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,5 +11,6 @@ public partial class EncaixaContext(DbContextOptions<EncaixaContext> options)
         base.OnModelCreating(modelBuilder);
 
         ConfigureUsers(modelBuilder);
+        ConfigurePackageBoxes(modelBuilder);
     }
 }

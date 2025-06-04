@@ -12,7 +12,7 @@ public partial class EncaixaContext
     {
         modelBuilder.Entity<User>(e =>
         {
-            e.ToTable("[User].UsersData");
+            e.ToTable("UsersData", schema: "User");
             e.HasKey(e => e.Id);
             e.Property(c => c.EntityStatus);
 
@@ -33,8 +33,8 @@ public partial class EncaixaContext
         });
 
         modelBuilder.Entity<UserApplication>()
-        .HasOne(a => a.User).WithOne()
-        .HasForeignKey<UserApplication>(f => f.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+                    .HasOne(a => a.User).WithOne()
+                    .HasForeignKey<UserApplication>(f => f.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
     }
 }

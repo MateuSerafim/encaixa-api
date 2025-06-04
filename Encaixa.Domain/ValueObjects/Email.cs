@@ -8,6 +8,11 @@ public class Email: ValueObject<string>, IValueObject<string, Email>
 {
     public const int MinEmailLength = 10;
     public const int MaxEmailLength = 255;
+
+    public static string ErrorEmailRange
+    => $"Email deve ter comprimento entre {MinEmailLength} e {MaxEmailLength}!";
+    public static string InvalidEmailRegex 
+    => "Email está fora do padrão nome@provedor.ref!";
     
     private Email(string value) : base(value)
     {
@@ -18,7 +23,7 @@ public class Email: ValueObject<string>, IValueObject<string, Email>
 
     public IValueValidator<string> Validator()
     => new ValueValidator<string>(Value)
-        .SetMinLengthText(MinEmailLength)
-        .SetMaxLengthText(MaxEmailLength)
-        .SetRegexValidation(RegexCommonExpressions.GenericEmail);
+        .SetMinLengthText(MinEmailLength, ErrorEmailRange)
+        .SetMaxLengthText(MaxEmailLength, ErrorEmailRange)
+        .SetRegexValidation(RegexCommonExpressions.GenericEmail, InvalidEmailRegex);
 }

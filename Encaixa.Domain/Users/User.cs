@@ -1,6 +1,7 @@
 using BaseRepository.Entities.Base;
 using BaseUtils.FlowControl.ErrorType;
 using BaseUtils.FlowControl.ResultType;
+using Encaixa.Domain.Packages;
 using Encaixa.Domain.ValueObjects;
 
 namespace Encaixa.Domain.Users;
@@ -9,6 +10,8 @@ public class User : Entity<Guid>
     public Email Email { get; }
     public Name FirstName { get; private set; }
     public Name? Surname { get; private set; }
+
+    public virtual List<PackageBox> PackageBoxes { get; private set; } = [];
 
     protected User() : base() { }
 
@@ -44,7 +47,26 @@ public class User : Entity<Guid>
         if (surnameResult.IsFailure)
             return surnameResult.Errors;
 
+        newUser.AddInitialPackageBoxes();
+
         return newUser;
+    }
+
+    private void AddInitialPackageBoxes()
+    {
+        PackageBoxes.Add(PackageBox.Create("Caixa 1", 30, 40, 80, Id).GetValue());
+        PackageBoxes.Add(PackageBox.Create("Caixa 2", 80, 50, 40, Id).GetValue());
+        PackageBoxes.Add(PackageBox.Create("Caixa 3", 50, 80, 60, Id).GetValue());
+    }
+
+    public override Result Remove()
+    {
+        foreach (var box in PackageBoxes)
+        {
+            box.Remove();
+        }
+
+        return base.Remove();
     }
 
     public Result SetSurname(string surname)

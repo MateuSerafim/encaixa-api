@@ -8,6 +8,9 @@ public class Name: ValueObject<string>, IValueObject<string, Name>
 {
     public const int MinNameLength = 5;
     public const int MaxNameLength = 255;
+
+    public static string ErrorNameRange
+    => $"Nome deve estar entre {MinNameLength} e {MaxNameLength}!";
     
     private Name(string value) : base(value)
     {
@@ -18,6 +21,6 @@ public class Name: ValueObject<string>, IValueObject<string, Name>
 
     public IValueValidator<string> Validator()
     => new ValueValidator<string>(Value)
-        .SetMinLengthText(MinNameLength)
-        .SetMaxLengthText(MaxNameLength);
+        .SetMinLengthText(MinNameLength, ErrorNameRange)
+        .SetMaxLengthText(MaxNameLength, ErrorNameRange);
 }

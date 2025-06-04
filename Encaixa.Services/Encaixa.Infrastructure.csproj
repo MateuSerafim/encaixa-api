@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Context\EntitiesMapping\Packages\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

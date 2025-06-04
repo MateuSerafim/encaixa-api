@@ -1,21 +1,29 @@
 using EncaixaAPI.Configurations;
 using EncaixaAPI.Endpoints;
+using EncaixaAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.BuildWebApplication();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
 {
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Encaixa API v1");
+    c.RoutePrefix = "";
+});
 
 app.UseHttpsRedirection();
-app.RegisterUsersEndpoints();
 
-app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseMiddleware<AuthMiddleware>();
+
+app.RegisterUsersEndpoints();
+app.RegisterPackagesEndpoints();
 
 app.Run();
