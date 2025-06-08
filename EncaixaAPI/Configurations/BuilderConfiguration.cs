@@ -5,6 +5,7 @@ using Encaixa.Application.Services.Packages;
 using Encaixa.Application.Services.Users;
 using Encaixa.Infrastructure.Context;
 using Encaixa.Infrastructure.UserIdentity;
+using EncaixaAPI.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ public static class BuilderConfiguration
     public static WebApplication BuildWebApplication(this WebApplicationBuilder builder)
     {
         builder.ConfigureSwaggerGeneration();
-        builder.ConfigureContext();
+        builder.ConfigureDatabaseContext();
         builder.ConfigureAuthentication();
         builder.ConfigureIdentityServices();
         builder.ConfigureServices();
@@ -57,7 +58,7 @@ public static class BuilderConfiguration
         });
     }
     
-    public static void ConfigureContext(this WebApplicationBuilder builder)
+    public static void ConfigureDatabaseContext(this WebApplicationBuilder builder)
     {
         builder.Services.AddDbContext<EncaixaContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -65,31 +66,11 @@ public static class BuilderConfiguration
         builder.Services.AddScoped<DbContext>(provider => provider.GetRequiredService<EncaixaContext>());
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
-
-    public static void ConfigureIdentityServices(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddIdentityCore<UserApplication>()
-                        .AddRoles<IdentityRole>()
-                        .AddEntityFrameworkStores<EncaixaContext>();
-        
-        builder.Services.Configure<IdentityOptions>(options =>
-        {
-            options.User.RequireUniqueEmail = true;
-        });
-    }
-
-    public static void ConfigureServices(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<IOrchestrator, Orchestrator>();
-
-        builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddScoped<IPackageBoxService, PackageBoxService>();
-    }
     
     public static void ConfigureAuthentication(this WebApplicationBuilder builder)
     {
-        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-        var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ?? new JwtSettings();
+        builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JwtSettings"));
+        var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JWTSettings>();
 
         builder.Services.AddAuthentication(options =>
         {
@@ -99,7 +80,7 @@ public static class BuilderConfiguration
         })
         .AddJwtBearer(options =>
         {
-            var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+            var key = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
 
             options.TokenValidationParameters = new TokenValidationParameters
             {
@@ -118,5 +99,27 @@ public static class BuilderConfiguration
         builder.Services.AddAuthorization();
 
         builder.Services.AddRouting();
+    }
+
+    public static void ConfigureIdentityServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddIdentityCore<UserApplication>()
+                        .AddRoles<IdentityRole>()
+                        .AddEntityFrameworkStores<EncaixaContext>();
+
+        builder.Services.Configure<IdentityOptions>(options =>
+        {
+            options.User.RequireUniqueEmail = true;
+        });
+    }
+
+    public static void ConfigureServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<IOrchestrator, Orchestrator>();
+
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IPackageBoxService, PackageBoxService>();
+
+        builder.Services.AddScoped<UserReference>();
     }
 }

@@ -17,7 +17,7 @@ public static class ResultResponseExtensions
         if (result.IsFailure)
             return result.Errors.SetAPIResponse();
 
-        return Results.Ok(result.GetValue());
+        return Results.Ok(new ResponseAPI<T>(result.GetValue()));
     }
 
     public static IResult SetAPIResponse<T>(this Result<T> result, string resourceUrl)
@@ -45,9 +45,7 @@ public static class ResultResponseExtensions
         if (errors.Any(e => e.ErrorType == ErrorTypeEnum.NotFoundError))
             return Results.NotFound();
 
-        var concatenateErrorsMessage = string.Concat("Erro(s): ",
-            string.Join("|", errors.Select(s => s.ErrorMessage())));
-
-        return Results.BadRequest(concatenateErrorsMessage);
+        return Results.BadRequest(
+            new ResponseAPI<string>([.. errors.Select(s => s.ErrorMessage())]));
     }
 }

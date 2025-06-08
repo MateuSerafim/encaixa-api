@@ -1,10 +1,9 @@
-using System.Security.Claims;
 using Encaixa.Application.Functions.Users.Commands;
 using Encaixa.Application.Functions.Users.Queries;
 using Encaixa.Application.Orquestrators;
 using Encaixa.Application.Services.Users;
+using Encaixa.Infrastructure.UserIdentity;
 using EncaixaAPI.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EncaixaAPI.Endpoints;
@@ -15,6 +14,7 @@ public static class UsersEndpoints
     public static void RegisterUsersEndpoints(this WebApplication app)
     {
         var user = app.MapGroup(urlGroupV1).WithTags("Users");
+
         user.RegisterUserEndpoint();
         user.LoginEndpoint();
 
@@ -30,7 +30,7 @@ public static class UsersEndpoints
             var result = await orcherstrator.ExecuteCommandAsync(
                 new CreateUserRequestHandler(usuarioService, request));
 
-            return result.SetAPIResponse(urlGroupV1 + "/{userId}");
+            return result.SetAPIResponse(urlGroupV1 + "/users/{userId}");
         });
     }
 
@@ -51,14 +51,14 @@ public static class UsersEndpoints
     {
         app.MapGet("/users/self", async (IOrchestrator orcherstrator,
                                          IUserService usuarioService,
-                                         ClaimsPrincipal user) =>
+                                         UserReference currentUser) =>
         {
-            var tryGetUserId = Guid.TryParse(user.FindFirst("UserId")?.Value, out var userId);
-            if (!tryGetUserId)
+
+            if (currentUser is null)
                 return Results.Unauthorized();
 
             var result = await orcherstrator.ExecuteQueryAsync(
-                new GetUserRequestHandler(usuarioService, new GetUserRequest(userId)));
+                new GetUserRequestHandler(usuarioService, new GetUserRequest(currentUser.UserId)));
             
             return result.SetAPIResponse();
         }).RequireAuthorization();

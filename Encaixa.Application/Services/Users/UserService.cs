@@ -83,7 +83,6 @@ public class UserService(IUnitOfWork unitOfWork,
             new("UserId", user.UserId.ToString()),
             new(ClaimTypes.Name, user.UserName!),
             new(ClaimTypes.Email, user.Email!),
-            new(ClaimTypes.NameIdentifier, user.Id), // este é o padrão
         };
 
         var token = new JwtSecurityToken(issuer: issuer, audience: audience,

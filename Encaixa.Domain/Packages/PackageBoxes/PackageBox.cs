@@ -21,6 +21,10 @@ public class PackageBox : Entity<Guid>
 
     public int Volume => Height.Value * Width.Value * Length.Value;
 
+    public int Area => 2 * (Height.Value * Width.Value)
+                     + 2 * (Width.Value * Length.Value)
+                     + 2 * (Height.Value * Length.Value);
+
     public Guid UserId { get; }
     public virtual User User { get; }
     
